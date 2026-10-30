@@ -8,8 +8,12 @@ import { quote } from './market.js';
  * Every seeded account is flagged `is_demo = 1` and shown with a DEMO badge in the
  * product. Nothing here represents real money, real custody or real execution.
  */
-const DEMO_EMAIL = 'demo@novatradex.com';
-const DEMO_PASSWORD = 'DemoTrader!2024';
+const DEMO_EMAIL = process.env.DEMO_CUSTOMER_EMAIL || 'demo@novatradex.com';
+const DEMO_PASSWORD = process.env.DEMO_CUSTOMER_PASSWORD || 'DemoTrader!2024';
+const DEMO_ADMIN = {
+  email: process.env.DEMO_ADMIN_EMAIL || 'admin@novatradex.com',
+  password: process.env.DEMO_ADMIN_PASSWORD || 'NovaOwner!2024',
+};
 const DEMO_STARTING_BALANCE = 250_000_00;
 
 const toCents = (value) => Math.round(value * 100);
@@ -109,6 +113,28 @@ export async function seedDemoData() {
   const sampleHash = await hashPassword('SamplePass!2024');
 
   const seed = db.transaction(() => {
+    /* ---- demo administrator (setup is locked once any admin exists) */
+    const demoAdminId = newId('adm');
+    db.prepare(
+      `INSERT INTO users (id, email, password_hash, role, status, first_name, last_name, country, is_demo,
+                          created_at, updated_at, approved_at, approved_by)
+       VALUES (?, ?, ?, 'admin', 'active', 'Nova', 'Owner', 'Global', 1, datetime('now'), datetime('now'), datetime('now'), 'seed:owner')`
+    ).run(demoAdminId, DEMO_ADMIN.email, demoHash, );
+    db.prepare('INSERT INTO accounts (id, user_id, currency, balance_cents) VALUES (?, ?, ?, 0)').run(
+      newId('acc'),
+      demoAdminId,
+      'USD'
+    );
+    audit({
+      actorId: demoAdminId,
+      actorEmail: DEMO_ADMIN.email,
+      actorRole: 'admin',
+      action: 'owner_setup_completed',
+      targetType: 'user',
+      targetId: demoAdminId,
+      detail: 'Demo owner administrator seeded — owner setup endpoint is now locked',
+    });
+
     /* ---- primary demo trader -------------------------------------- */
     const demoId = makeUser({
       email: DEMO_EMAIL,

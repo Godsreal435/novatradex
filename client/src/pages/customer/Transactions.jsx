@@ -171,8 +171,8 @@ export default function Transactions() {
 
       <Alert tone="info">
         This ledger is sample data for a demonstration platform. Values are not redeemable, do not represent real
-        holdings, and no real-money processing takes place. Unrealised P&L shown elsewhere uses simulated quotes
-        ({percent(0)} is not a guarantee of anything).
+        holdings, and no real-money processing takes place. Any P&amp;L shown elsewhere is calculated from simulated
+        quotes and is not an indication of future results.
       </Alert>
     </>
   );

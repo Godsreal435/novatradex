@@ -5,7 +5,15 @@ import { useToast } from '../../components/ui';
 import { Alert, DemoBadge, EmptyState, Field, Skeleton, StatusBadge } from '../../components/ui';
 import { STATUS_LABELS, when } from '../../lib/format';
 
-const TOPICS = ['Account access', 'Deposit request', 'Withdrawal request', 'Trading platform', 'Verification', 'Other'];
+const CATEGORIES = [
+  { value: 'general', label: 'General question' },
+  { value: 'account', label: 'Account access' },
+  { value: 'payments', label: 'Deposit or withdrawal' },
+  { value: 'security', label: 'Security concern' },
+  { value: 'technical', label: 'Platform / technical' },
+];
+
+const CATEGORY_LABELS = CATEGORIES.reduce((acc, item) => ({ ...acc, [item.value]: item.label }), {});
 
 export default function Support() {
   const { ticketId } = useParams();
@@ -16,7 +24,7 @@ export default function Support() {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [composing, setComposing] = useState(false);
-  const [form, setForm] = useState({ subject: '', topic: TOPICS[0], message: '' });
+  const [form, setForm] = useState({ subject: '', category: 'general', message: '' });
   const [reply, setReply] = useState('');
   const threadEnd = useRef(null);
 
@@ -62,11 +70,11 @@ export default function Support() {
     setError('');
     try {
       const result = await api.createTicket(form);
-      toast.success('Support request created.');
-      setForm({ subject: '', topic: TOPICS[0], message: '' });
+      toast.success(result?.message || 'Support request submitted.');
+      setForm({ subject: '', category: 'general', message: '' });
       setComposing(false);
       await loadTickets();
-      if (result?.ticket?.id) navigate(`/app/support/${result.ticket.id}`);
+      if (result?.id) navigate(`/app/support/${result.id}`);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -130,16 +138,16 @@ export default function Support() {
                 placeholder="Brief summary of the issue"
               />
             </Field>
-            <Field label="Topic" htmlFor="topic">
+            <Field label="Topic" htmlFor="category">
               <select
-                id="topic"
+                id="category"
                 className="select"
-                value={form.topic}
-                onChange={(event) => setForm({ ...form, topic: event.target.value })}
+                value={form.category}
+                onChange={(event) => setForm({ ...form, category: event.target.value })}
               >
-                {TOPICS.map((topic) => (
-                  <option key={topic} value={topic}>
-                    {topic}
+                {CATEGORIES.map((item) => (
+                  <option key={item.value} value={item.value}>
+                    {item.label}
                   </option>
                 ))}
               </select>
@@ -187,7 +195,8 @@ export default function Support() {
                     <StatusBadge status={ticket.status} label={STATUS_LABELS[ticket.status]} />
                   </div>
                   <div className="ticket-meta">
-                    {ticket.topic || 'General'} · {ticket.message_count ?? 0} message(s) · {when(ticket.updated_at || ticket.createdAt || ticket.created_at)}
+                    {CATEGORY_LABELS[ticket.category] || 'General'} · {ticket.message_count ?? 0} message(s) ·{' '}
+                    {when(ticket.updated_at)}
                   </div>
                 </button>
               ))}

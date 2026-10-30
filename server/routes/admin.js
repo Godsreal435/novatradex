@@ -486,10 +486,19 @@ router.patch('/payments/:id', (req, res) => {
 
       db.prepare(
         `UPDATE transactions
-         SET status = ?, reviewed_at = datetime('now'), reviewed_by = ?, review_note = ?,
+         SET status = ?, reviewed_at = datetime('now'), reviewed_by = ?,
+             note = CASE WHEN ? <> '' THEN ? ELSE note END,
              balance_after_cents = CASE WHEN ? = 'approved' THEN ? ELSE balance_after_cents END
          WHERE id = ?`
-      ).run(action === 'approve' ? 'approved' : 'rejected', req.user.id, reason || null, action === 'approve' ? 'approved' : 'rejected', balanceAfter, row.id);
+      ).run(
+        action === 'approve' ? 'approved' : 'rejected',
+        req.user.id,
+        reason,
+        reason,
+        action === 'approve' ? 'approved' : 'rejected',
+        balanceAfter,
+        row.id
+      );
 
       audit({
         actorId: req.user.id,

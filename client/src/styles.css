@@ -905,7 +905,6 @@ code {
   display: grid;
   gap: 7px;
   font-size: 0.85rem;
-  color: #cfb храм;
   color: #cdb894;
 }
 
@@ -993,8 +992,6 @@ code {
   content: '';
   position: absolute;
   inset: 0;
-  background-image linear-gradient(rgba(148, 170, 214, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(148, 170, 214, 0.06) 1px, transparent 1px);
   background-image: linear-gradient(rgba(148, 170, 214, 0.06) 1px, transparent 1px),
     linear-gradient(90deg, rgba(148, 170, 214, 0.06) 1px, transparent 1px);
   background-size: 64px 64px;

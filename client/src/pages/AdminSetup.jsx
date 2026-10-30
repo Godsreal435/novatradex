@@ -109,7 +109,7 @@ export default function AdminSetup() {
               <p className="muted">
                 This endpoint is used once. It requires the server-side <code>OWNER_SETUP_TOKEN</code> and becomes
                 permanently unavailable as soon as the first administrator account exists.
-              '</p>
+              </p>
 
               <form className="form" onSubmit={onSubmit}>
                 <Alert tone="error">{error}</Alert>

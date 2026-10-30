@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../../api';
 import { Alert, DemoBadge, EmptyState, Skeleton, StatusBadge } from '../../components/ui';
-import { KIND_LABELS, STATUS_LABELS, dateTime, money, percent, price, quantity } from '../../lib/format';
+import { KIND_LABELS, STATUS_LABELS, dateTime, money, price, quantity } from '../../lib/format';
 
 const KINDS = [
   { key: '', label: 'All types' },

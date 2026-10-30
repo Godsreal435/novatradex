@@ -205,11 +205,10 @@ export async function seedDemoData() {
     ).run(newId('msg'), ticketId, demoId, 'Ava Mercer', 'I would like to add an extra layer of security to my demo account. Where can I enable 2FA?', daysAgo(5, 11));
     db.prepare(
       `INSERT INTO support_messages (id, ticket_id, author_id, author_role, author_name, body, created_at)
-       VALUES (?, ?, ?, 'admin', ?, ?, ?)`
+       VALUES (?, ?, NULL, 'system', ?, ?, ?)`
     ).run(
       newId('msg'),
       ticketId,
-      demoId, // author placeholder for seeded data only
       'NovaTradeX Support',
       'Two-factor authentication is on the roadmap for this demo build. Sessions are already protected with httpOnly cookies and server-side role checks.',
       daysAgo(4, 9)

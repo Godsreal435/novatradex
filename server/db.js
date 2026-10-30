@@ -134,7 +134,7 @@ CREATE INDEX IF NOT EXISTS idx_tickets_user ON support_tickets(user_id, updated_
 CREATE TABLE IF NOT EXISTS support_messages (
   id          TEXT PRIMARY KEY,
   ticket_id   TEXT NOT NULL REFERENCES support_tickets(id) ON DELETE CASCADE,
-  author_id   TEXT NOT NULL REFERENCES users(id),
+  author_id   TEXT REFERENCES users(id),
   author_role TEXT NOT NULL CHECK (author_role IN ('customer','admin','system')),
   author_name TEXT NOT NULL DEFAULT '',
   body        TEXT NOT NULL,

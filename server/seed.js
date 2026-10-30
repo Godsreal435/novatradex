@@ -119,7 +119,7 @@ export async function seedDemoData() {
       `INSERT INTO users (id, email, password_hash, role, status, first_name, last_name, country, is_demo,
                           created_at, updated_at, approved_at, approved_by)
        VALUES (?, ?, ?, 'admin', 'active', 'Nova', 'Owner', 'Global', 1, datetime('now'), datetime('now'), datetime('now'), 'seed:owner')`
-    ).run(demoAdminId, DEMO_ADMIN.email, demoHash, );
+    ).run(demoAdminId, DEMO_ADMIN.email, demoHash);
     db.prepare('INSERT INTO accounts (id, user_id, currency, balance_cents) VALUES (?, ?, ?, 0)').run(
       newId('acc'),
       demoAdminId,

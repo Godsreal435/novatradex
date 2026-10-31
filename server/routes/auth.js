@@ -19,7 +19,7 @@ import { publicUser } from '../helpers.js';
 const router = express.Router();
 
 const clean = (value, max = 80) => String(value ?? '').trim().slice(0, max);
-const DEMO_STARTING_BALANCE = 100_000_00;
+
 
 function clientIp(req) {
   return String(req.ip || '').slice(0, 80);

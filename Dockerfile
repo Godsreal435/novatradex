@@ -14,7 +14,9 @@ ENV PORT=3000
 ENV HOST=0.0.0.0
 
 COPY package.json package-lock.json ./
-RUN npm ci --no-audit --no-fund
+# NODE_ENV=production makes npm skip devDependencies, but `vite` lives there and is
+# required by `npm run build`, so dev deps must be installed explicitly.
+RUN npm ci --include=dev --no-audit --no-fund
 
 COPY . .
 

@@ -245,10 +245,12 @@ async function main() {
     check('no uncaught page errors during the walkthrough', pageErrors.length === 0, pageErrors.join(' | '));
   } finally {
     await browser.close().catch(() => {});
-    server.kill('SIGTERM');
-    await sleep(200);
-    if (!server.killed || server.exitCode === null) server.kill('SIGKILL');
-    fs.rmSync(dir, { recursive: true, force: true });
+    if (server) {
+      server.kill('SIGTERM');
+      await sleep(200);
+      if (!server.killed || server.exitCode === null) server.kill('SIGKILL');
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
     if (failures.length) console.log(`\n--- server output ---\n${serverLog.trim()}`);
   }
 

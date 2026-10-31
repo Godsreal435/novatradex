@@ -5,56 +5,38 @@ import { useAuth } from '../auth';
 import { DemoBadge } from '../components/ui';
 import { price, percent, cx } from '../lib/format';
 
-const ASSET_COPY = {
-  forex: {
-    icon: 'FX',
-    points: ['24/5 simulated market access', 'Major and minor pairs', 'Position sizing in one place'],
-  },
-  crypto: {
-    icon: '₿',
-    points: ['Always-on demo markets', 'BTC, ETH and SOL', 'Same ledger as every other asset'],
-  },
-  stocks: {
-    icon: 'EQ',
-    points: ['Global equity names', 'Fractional position sizing', 'Portfolio marked to demo prices'],
-  },
-  gold: {
-    icon: 'Au',
-    points: ['Gold and silver spot', 'Hedge-style demo positions', 'Precious metals in one portfolio'],
-  },
-};
+const ASSETS = [
+  { id: 'forex', icon: '↗', name: 'Forex', description: 'Explore major and minor currency pairs.' },
+  { id: 'crypto', icon: '₿', name: 'Cryptocurrency', description: 'Explore Bitcoin, Ethereum and other digital assets.' },
+  { id: 'stocks', icon: '▥', name: 'Stocks', description: 'Discover global equity markets.' },
+  { id: 'gold', icon: 'Au', name: 'Gold & Metals', description: 'Explore gold, silver and precious metals.' },
+];
 
 function PublicNav() {
   const { user } = useAuth();
+
   return (
     <header className="public-nav">
       <div className="public-nav-inner">
         <Link className="brand" to="/">
-          <span className="brand-mark" aria-hidden="true">
-            N
-          </span>
+          <span className="brand-mark">N</span>
           <span>
             NovaTradeX
-            <span className="brand-sub">Simulated trading demo</span>
+            <span className="brand-sub">Trading platform</span>
           </span>
         </Link>
 
-        <nav className="nav-actions" aria-label="Primary">
-          <a className="btn btn-ghost" href="#markets">
-            Markets
-          </a>
+        <nav className="nav-actions">
+          <a className="btn btn-ghost" href="#markets">Markets</a>
+          <a className="btn btn-ghost" href="#platform">Platform</a>
           {user ? (
-            <Link className="btn btn-outline" to={user.role === 'admin' ? '/admin' : '/app'}>
-              Open workspace
+            <Link className="btn btn-primary" to={user.role === 'admin' ? '/admin' : '/app'}>
+              Open Dashboard
             </Link>
           ) : (
             <>
-              <Link className="btn btn-ghost" to="/login">
-                Login
-              </Link>
-              <Link className="btn btn-primary" to="/register">
-                Create Account
-              </Link>
+              <Link className="btn btn-ghost" to="/login">Log in</Link>
+              <Link className="btn btn-primary" to="/register">Get Started</Link>
             </>
           )}
         </nav>
@@ -64,36 +46,45 @@ function PublicNav() {
 }
 
 function MarketConsole({ instruments }) {
-  const rows = instruments.slice(0, 6);
   return (
-    <aside className="console" aria-label="Simulated market console">
+    <div className="console">
       <div className="console-head">
-        <span className="console-title">Market console</span>
+        <div>
+          <span className="console-title">Market Watch</span>
+          <p className="small muted">Explore available markets</p>
+        </div>
         <DemoBadge />
       </div>
+
       <div className="console-body">
-        {rows.map((quote) => {
-          const up = (quote.changePct ?? 0) >= 0;
+        {instruments.slice(0, 6).map((item) => {
+          const up = (item.changePct ?? 0) >= 0;
           return (
-            <div className="quote-row" key={quote.symbol}>
+            <div className="quote-row" key={item.symbol}>
               <span>
-                <span className="quote-sym">{quote.symbol}</span>
-                <span className="quote-name">{quote.name}</span>
+                <strong className="quote-sym">{item.symbol}</strong>
+                <span className="quote-name">{item.name}</span>
               </span>
               <span className="num">
-                <span className="quote-price">{price(quote.price, quote.precision)}</span>
+                <strong className="quote-price">
+                  {price(item.price, item.precision)}
+                </strong>
                 <span className={cx('quote-delta', up ? 'pos' : 'neg')}>
-                  {up ? '▲' : '▼'} {percent(quote.changePct)}
+                  {up ? '▲' : '▼'} {percent(item.changePct)}
                 </span>
               </span>
             </div>
           );
         })}
+        {!instruments.length && (
+          <p className="muted small">Market information is loading.</p>
+        )}
       </div>
+
       <div className="console-foot">
-        Illustrative prices generated for the demo — not live exchange quotes.
+        Illustrative demo prices. Not live exchange quotes.
       </div>
-    </aside>
+    </div>
   );
 }
 
@@ -103,20 +94,19 @@ export default function Home() {
 
   useEffect(() => {
     let alive = true;
-    api
-      .publicOverview()
-      .then((payload) => {
-        if (alive) setData(payload);
+    api.publicOverview()
+      .then((result) => {
+        if (alive) setData(result);
       })
       .catch((err) => {
         if (alive) setError(err.message);
       });
+
     return () => {
       alive = false;
     };
   }, []);
 
-  const assetClasses = data?.assetClasses || [];
   const instruments = data?.instruments || [];
 
   return (
@@ -128,108 +118,108 @@ export default function Home() {
           <div className="container hero-grid">
             <div>
               <p className="eyebrow">
-                <span className="pill-dot" aria-hidden="true" /> Multi-asset brokerage demo
+                <span className="pill-dot" /> YOUR MARKETS. YOUR PLATFORM.
               </p>
+
               <h1>
-                Trade four markets with one <span className="grad">institutional-grade</span> ledger.
+                One platform.
+                <br />
+                <span className="grad">More ways to trade.</span>
               </h1>
+
               <p className="hero-lede">
-                NovaTradeX is a complete brokerage workspace — Forex, cryptocurrency, equities and precious metals in a
-                single portfolio, with an administrator review desk for account approvals and payment requests. Every
-                balance here is simulated demo capital.
+                Discover Forex, cryptocurrency, stocks and precious metals
+                through one streamlined trading dashboard.
               </p>
+
               <div className="hero-actions">
                 <Link className="btn btn-primary btn-lg" to="/register">
-                  Create Account
+                  Open an Account
                 </Link>
                 <Link className="btn btn-outline btn-lg" to="/login">
-                  Login
+                  Sign In
                 </Link>
               </div>
+
               <p className="hero-note">
-                <DemoBadge>Demo environment</DemoBadge>{' '}
-                No real money is deposited, withdrawn, held or traded on this platform.
+                <DemoBadge>Demo platform</DemoBadge>{' '}
+                Explore the platform using simulated funds and prices.
               </p>
             </div>
 
-            <MarketConsole instruments={instruments.length ? instruments : []} />
+            <MarketConsole instruments={instruments} />
           </div>
         </section>
 
         <section className="section section-alt" id="markets">
           <div className="container">
             <div className="section-head">
-              <p className="eyebrow">Markets</p>
-              <h2>Four asset classes, one account</h2>
+              <p className="eyebrow">MARKET OPPORTUNITIES</p>
+              <h2>Explore multiple markets</h2>
               <p className="muted">
-                Each market below is available in the demo with simulated quotes, position sizing and settlement into a
-                single demo ledger.
+                Access different asset categories from one convenient account.
               </p>
             </div>
 
             <div className="grid-4">
-              {assetClasses.map((asset, index) => {
-                const copy = ASSET_COPY[asset.id] || { icon: '•', points: [] };
-                const symbols = instruments.filter((i) => i.assetClass === asset.id);
-                return (
-                  <article className="asset-card" key={asset.id}>
-                    <div className="row-between">
-                      <span className="asset-icon">{copy.icon}</span>
-                      <span className="feature-index">0{index + 1}</span>
-                    </div>
-                    <h3>{asset.label}</h3>
-                    <p className="small muted">{asset.headline}</p>
-                    <p className="small">{asset.blurb}</p>
-                    <div className="asset-tags">
-                      {symbols.map((s) => (
-                        <span className="tag" key={s.symbol}>
-                          {s.symbol}
-                        </span>
-                      ))}
-                    </div>
-                    <ul className="check">
-                      {copy.points.map((point) => (
-                        <li key={point}>{point}</li>
-                      ))}
-                    </ul>
-                  </article>
-                );
-              })}
+              {ASSETS.map((asset, index) => (
+                <article className="asset-card" key={asset.id}>
+                  <div className="row-between">
+                    <span className="asset-icon">{asset.icon}</span>
+                    <span className="feature-index">0{index + 1}</span>
+                  </div>
+                  <h3>{asset.name}</h3>
+                  <p className="small muted">{asset.description}</p>
+                  <a className="btn btn-ghost" href="/login">
+                    Explore market →
+                  </a>
+                </article>
+              ))}
             </div>
 
-            {error ? <p className="muted small">Market preview unavailable: {error}</p> : null}
+            {error && (
+              <p className="muted small">
+                Market preview temporarily unavailable.
+              </p>
+            )}
           </div>
         </section>
 
-        <section className="section">
+        <section className="section" id="platform">
           <div className="container">
             <div className="section-head">
-              <p className="eyebrow">Platform</p>
-              <h2>Built like a brokerage, labelled like a demo</h2>
+              <p className="eyebrow">THE NOVATRADEX PLATFORM</p>
+              <h2>Everything in one place</h2>
+              <p className="muted">
+                A simple way to access your account and explore the platform.
+              </p>
             </div>
+
             <div className="grid-3">
               <article className="feature">
                 <span className="feature-index">01</span>
-                <h3>Reviewed onboarding</h3>
+                <h3>Easy account access</h3>
                 <p className="small muted">
-                  New registrations are created as pending customer accounts. An administrator approves access from a
-                  separate, private admin console before the trading dashboard opens.
+                  Register for an account and access your personal dashboard
+                  after administrator approval.
                 </p>
               </article>
+
               <article className="feature">
                 <span className="feature-index">02</span>
-                <h3>Ledger-first accounting</h3>
+                <h3>Portfolio overview</h3>
                 <p className="small muted">
-                  Balances, positions, trades and payment requests are derived from an append-only simulated ledger, so
-                  the portfolio always reconciles with transaction history.
+                  View your account balance, activity and portfolio information
+                  from one dashboard.
                 </p>
               </article>
+
               <article className="feature">
                 <span className="feature-index">03</span>
-                <h3>Server-enforced roles</h3>
+                <h3>Account management</h3>
                 <p className="small muted">
-                  Sessions live in httpOnly cookies and every customer and administrator action is authorised on the
-                  server. Roles cannot be changed from the browser.
+                  Keep track of account activity and requests through your
+                  personal workspace.
                 </p>
               </article>
             </div>
@@ -240,17 +230,18 @@ export default function Home() {
           <div className="container">
             <div className="cta-band">
               <div>
-                <h2>Open a simulated account in under a minute</h2>
+                <p className="eyebrow">GET STARTED</p>
+                <h2>Your trading journey starts here.</h2>
                 <p className="muted">
-                  Registration is free, uses demo capital only, and requires administrator approval before trading.
+                  Create your NovaTradeX demo account and explore the platform.
                 </p>
               </div>
               <div className="hero-actions">
                 <Link className="btn btn-primary btn-lg" to="/register">
                   Create Account
                 </Link>
-                <Link className="btn btn-ghost btn-lg" to="/login">
-                  Login
+                <Link className="btn btn-outline btn-lg" to="/login">
+                  Log In
                 </Link>
               </div>
             </div>
@@ -260,19 +251,13 @@ export default function Home() {
         <section className="section">
           <div className="container">
             <div className="disclaimer">
-              <h3>Important demo disclosure</h3>
-              <ul>
-                <li>NovaTradeX is a product demonstration, not a licensed broker or financial institution.</li>
-                <li>
-                  All balances, positions, prices, trades, deposits and withdrawals are simulated sample data. No real
-                  money is accepted, transferred or held.
-                </li>
-                <li>Nothing shown here is investment advice, and no profit or performance figure is real.</li>
-                <li>
-                  Real-money brokerage activity requires licensing, segregated client funds, KYC/AML controls and
-                  regulatory approval that this demo does not provide.
-                </li>
-              </ul>
+              <h3>Platform information</h3>
+              <p className="small muted">
+                NovaTradeX currently operates as a simulated trading
+                demonstration. Market prices, balances and transactions are
+                simulated. This platform does not currently accept or hold
+                real-money deposits or execute live market trades.
+              </p>
             </div>
           </div>
         </section>
@@ -283,29 +268,32 @@ export default function Home() {
           <div className="footer-grid">
             <div>
               <span className="brand">
-                <span className="brand-mark" aria-hidden="true">
-                  N
-                </span>
+                <span className="brand-mark">N</span>
                 NovaTradeX
               </span>
-              <p className="small muted">Simulated multi-asset trading platform for demonstration purposes.</p>
+              <p className="small muted">
+                Explore markets through one streamlined platform.
+              </p>
             </div>
+
             <div>
               <p className="label">Account</p>
               <div className="footer-links">
-                <Link to="/login">Login</Link>
-                <Link to="/register">Create Account</Link>
+                <Link to="/login">Log in</Link>
+                <Link to="/register">Create account</Link>
               </div>
             </div>
+
             <div>
               <p className="label">Markets</p>
               <div className="footer-links">
                 <a href="#markets">Forex</a>
-                <a href="#markets">Cryptocurrency</a>
+                <a href="#markets">Crypto</a>
                 <a href="#markets">Stocks</a>
                 <a href="#markets">Gold</a>
               </div>
             </div>
+
             <div>
               <p className="label">Staff</p>
               <div className="footer-links">
@@ -313,9 +301,9 @@ export default function Home() {
               </div>
             </div>
           </div>
+
           <p className="footer-legal">
-            © {new Date().getFullYear()} NovaTradeX demo. Simulated data only — not a financial service, and no real
-            funds are processed.
+            © {new Date().getFullYear()} NovaTradeX. Simulated platform.
           </p>
         </div>
       </footer>

@@ -150,14 +150,17 @@ async function run() {
   const admin = makeClient();
 
   /* --- public catalog ------------------------------------------- */
-  const assets = await anon('GET', '/api/public/assets');
+  const assets = await anon('GET', '/api/public/overview');
+  const catalog = JSON.stringify(assets.body ?? {}).toLowerCase();
   check(
     'public asset catalog covers Forex, Crypto, Stocks and Gold',
-    assets.status === 200 &&
-      ['forex', 'crypto', 'stocks', 'commodities'].every((cl) =>
-        JSON.stringify(assets.body).toLowerCase().includes(cl)
-      ),
+    assets.status === 200 && ['forex', 'crypto', 'stocks', 'commodities'].every((cl) => catalog.includes(cl)),
     `status ${assets.status}`
+  );
+  check(
+    'public catalog is flagged as demo-only',
+    assets.body?.demoOnly === true && typeof assets.body?.notice === 'string',
+    JSON.stringify(assets.body?.notice ?? '').slice(0, 120)
   );
 
   /* --- owner setup token gate ----------------------------------- */

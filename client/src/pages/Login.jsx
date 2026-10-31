@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth';
-import { Alert, DemoBadge, Field } from '../components/ui';
+import { Alert, Field } from '../components/ui';
 
 export function AuthAside({ role = 'customer' }) {
   const points =
@@ -14,7 +14,7 @@ export function AuthAside({ role = 'customer' }) {
       : [
           'One portfolio across Forex, cryptocurrency, equities and gold.',
           'Deposit and withdrawal requests reviewed by an administrator.',
-          'Append-only simulated ledger keeps every balance reconciled.',
+          'Append-only ledger keeps every balance reconciled.',
         ];
 
   return (
@@ -25,15 +25,14 @@ export function AuthAside({ role = 'customer' }) {
         </span>
         <span>
           NovaTradeX
-          <span className="brand-sub">{role === 'admin' ? 'Staff console' : 'Simulated trading demo'}</span>
+          <span className="brand-sub">{role === 'admin' ? 'Staff console' : 'Customer portal'}</span>
         </span>
       </Link>
 
       <div>
-        <h2>{role === 'admin' ? 'Operations access for platform staff.' : 'A complete brokerage workspace, fully simulated.'}</h2>
+      <h2>{role === 'admin' ? 'Operations access for platform staff.' : 'A complete brokerage workspace.'}</h2>
         <p className="small">
-          Deep-navy console, institutional layout and a ledger that reconciles from an append-only journal. All balances
-          are demo capital.
+          Deep-navy console, institutional layout and a ledger that reconciles from an append-only journal.
         </p>
       </div>
 
@@ -45,10 +44,7 @@ export function AuthAside({ role = 'customer' }) {
         ))}
       </ul>
 
-      <div className="row" style={{ gap: 10, flexWrap: 'wrap' }}>
-        <DemoBadge>Demo environment</DemoBadge>
-        <span className="small muted">No real funds are processed.</span>
-      </div>
+   
     </aside>
   );
 }
@@ -85,7 +81,7 @@ export default function Login() {
         <div className="auth-card">
           <p className="eyebrow">Customer login</p>
           <h1>Welcome back</h1>
-          <p className="auth-sub muted">Sign in to your simulated trading workspace.</p>
+          <p className="auth-sub muted">Sign in to your trading workspace.</p>
 
           <form className="form" onSubmit={onSubmit}>
             <Alert tone="error">{error}</Alert>
@@ -130,10 +126,7 @@ export default function Login() {
             </p>
           </div>
 
-          <div className="demo-hint">
-            <strong>Demo customer credentials</strong>
-            <span className="mono small">demo@novatradex.com · DemoTrader!2024</span>
-          </div>
+        
         </div>
       </main>
     </div>

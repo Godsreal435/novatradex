@@ -14,7 +14,6 @@ const DEMO_ADMIN = {
   email: process.env.DEMO_ADMIN_EMAIL || 'admin@novatradex.com',
   password: process.env.DEMO_ADMIN_PASSWORD || 'NovaOwner!2024',
 };
-const DEMO_STARTING_BALANCE = 250_000_00;
 
 const toCents = (value) => Math.round(value * 100);
 
@@ -61,7 +60,7 @@ function makeUser({ email, password, firstName, lastName, role, status, isDemo, 
     newId('acc'),
     id,
     'USD',
-    status === 'pending' ? 0 : DEMO_STARTING_BALANCE
+    0
   );
   return id;
 }
@@ -150,16 +149,7 @@ export async function seedDemoData() {
       phone: '+44 20 7946 0958',
     });
 
-    ledger(demoId, {
-      kind: 'bonus',
-      status: 'completed',
-      amountCents: DEMO_STARTING_BALANCE,
-      method: 'internal',
-      reference: 'NTX-DEMO-OPENING-001',
-      note: 'Simulated demo funding — not real money',
-      balanceAfter: DEMO_STARTING_BALANCE,
-      createdAt: daysAgo(38),
-    });
+    
 
     const holdings = [
       { symbol: 'EUR/USD', quantity: 50_000, avgCost: 1.082, at: daysAgo(30) },
@@ -168,12 +158,11 @@ export async function seedDemoData() {
       { symbol: 'XAU/USD', quantity: 15, avgCost: 2340.1, at: daysAgo(12) },
     ];
 
-    let balance = DEMO_STARTING_BALANCE;
     holdings.forEach((holding, index) => {
       const current = quote(holding.symbol);
       const price = current ? current.price : holding.avgCost;
       const notional = toCents(holding.quantity * price);
-      balance -= notional;
+      
       addPosition(demoId, holding.symbol, holding.quantity, holding.avgCost, holding.at);
       ledger(demoId, {
         kind: 'trade_buy',
@@ -185,12 +174,12 @@ export async function seedDemoData() {
         symbol: holding.symbol,
         quantity: holding.quantity,
         price,
-        balanceAfter: balance,
+        
         createdAt: holding.at,
       });
     });
 
-    db.prepare("UPDATE accounts SET balance_cents = ?, updated_at = datetime('now') WHERE user_id = ?").run(balance, demoId);
+    
 
     /* A pending withdrawal and deposit so the admin review queue is demonstrable. */
     ledger(demoId, {

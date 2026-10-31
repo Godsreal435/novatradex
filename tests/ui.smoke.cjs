@@ -177,14 +177,12 @@ async function main() {
     check('/admin redirects an anonymous visitor to /admin/login', page.url().includes('/admin/login'), page.url());
 
     /* ---- customer login journey ---- */
-    await page.goto(`${BASE}/login`, { waitUntil: 'networkidle' });
-    await signIn(page, CUSTOMER);
-    const customerDashboard = await waitForText(page, 'Welcome back');
-    if (!customerDashboard) {
-      check('seeded customer reaches the dashboard', false, `${page.url()} — alert: ${await alertText(page)}`);
+    const customerLogin = await signInAndWait(page, `${BASE}/login`, CUSTOMER, 'Cash demo balance');
+    if (!customerLogin.ok) {
+      check('seeded customer reaches the dashboard', false, `${page.url()} — alert: ${customerLogin.alert}`);
     } else {
       check('seeded customer reaches the dashboard', page.url().includes('/app'), page.url());
-      check('dashboard greets the customer', true);
+      check('dashboard greets the customer', await waitForText(page, 'Welcome back,', 10000));
     }
     check('dashboard labels the balance as demo', await waitForText(page, 'Demo balance', 10000));
     check('dashboard labels prices as simulated', await waitForText(page, 'simulated', 10000));

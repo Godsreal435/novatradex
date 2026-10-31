@@ -154,7 +154,7 @@ async function run() {
   const catalog = JSON.stringify(assets.body ?? {}).toLowerCase();
   check(
     'public asset catalog covers Forex, Crypto, Stocks and Gold',
-    assets.status === 200 && ['forex', 'crypto', 'stocks', 'commodities'].every((cl) => catalog.includes(cl)),
+    assets.status === 200 && ['forex', 'crypto', 'stocks', 'gold'].every((cl) => catalog.includes(cl)),
     `status ${assets.status}`
   );
   check(

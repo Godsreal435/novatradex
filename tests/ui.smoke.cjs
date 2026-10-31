@@ -58,6 +58,24 @@ async function signIn(page, { email, password }) {
   await page.locator('button[type="submit"]').click();
 }
 
+/**
+ * Submit the form and wait for the post-login landmark.
+ * Retries once only when no error banner appeared (a hydration race swallows the
+ * first click); a visible alert is a genuine credential failure and is reported.
+ */
+async function signInAndWait(page, url, credentials, expectText) {
+  for (let attempt = 1; attempt <= 2; attempt += 1) {
+    await page.goto(url, { waitUntil: 'networkidle' });
+    await page.locator('button[type="submit"]').waitFor({ state: 'visible', timeout: 20000 });
+    await signIn(page, credentials);
+    if (await waitForText(page, expectText, 15000)) return { ok: true, attempt };
+    const alert = await alertText(page);
+    if (alert) return { ok: false, alert };
+    await sleep(500);
+  }
+  return { ok: false, alert: (await alertText(page)) || 'form submit produced no navigation and no error' };
+}
+
 async function waitForHealth(deadlineMs = 30000) {
   const started = Date.now();
   while (Date.now() - started < deadlineMs) {

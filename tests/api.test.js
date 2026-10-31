@@ -328,9 +328,9 @@ async function run() {
   );
 
   const adminReply = await admin('POST', `/api/admin/support/${ticket.body.id}/messages`, {
-    body: 'This is a simulated environment, so no real KYC documents are required.',
+    message: 'This is a simulated environment, so no real KYC documents are required.',
   });
-  check('administrator can reply to a support ticket', adminReply.status === 201 || adminReply.status === 200, `status ${adminReply.status}`);
+  check('administrator can reply to a support ticket', adminReply.status === 201, `status ${adminReply.status}`);
 
   const customerTicket = await customer('GET', `/api/me/support/${ticket.body.id}`);
   check(

@@ -160,14 +160,16 @@ async function main() {
 
     /* ---- customer login journey ---- */
     await page.goto(`${BASE}/login`, { waitUntil: 'networkidle' });
-    await page.locator('input[type="email"]').fill(CUSTOMER.email);
-    await page.locator('input[type="password"]').fill(CUSTOMER.password);
-    await page.locator('button[type="submit"]').click();
-    await page.waitForURL((url) => url.pathname.startsWith('/app'), { timeout: 15000 }).catch(() => {});
-    check('seeded customer reaches the dashboard', page.url().includes('/app'), page.url());
-    check('dashboard greets the customer', await page.getByText('Welcome back', { exact: false }).first().isVisible().catch(() => false));
-    check('dashboard labels the balance as demo', await page.getByText('Demo balance', { exact: false }).first().isVisible().catch(() => false));
-    check('dashboard labels prices as simulated', (await page.content()).toLowerCase().includes('simulated'));
+    await signIn(page, CUSTOMER);
+    const customerDashboard = await waitForText(page, 'Welcome back');
+    if (!customerDashboard) {
+      check('seeded customer reaches the dashboard', false, `${page.url()} — alert: ${await alertText(page)}`);
+    } else {
+      check('seeded customer reaches the dashboard', page.url().includes('/app'), page.url());
+      check('dashboard greets the customer', true);
+    }
+    check('dashboard labels the balance as demo', await waitForText(page, 'Demo balance', 10000));
+    check('dashboard labels prices as simulated', await waitForText(page, 'simulated', 10000));
 
     await page.goto(`${BASE}/app/transfers`, { waitUntil: 'networkidle' });
     check('transfers page warns that money movement is simulated', (await page.content()).toLowerCase().includes('simulat'));

@@ -1,19 +1,21 @@
-# NovaTradeX — simulated trading demo (multi-stage build)
+# NovaTradeX — simulated trading demo (multi-stage build, Alpine/musl runtime)
 #
-# Debian 13 ("trixie") is used for both stages on purpose: Debian 12's glibc still
-# carries unfixed critical advisories, while trixie ships the patched glibc, gnutls
-# and perl. The build toolchain stays in the builder stage so the shipped runtime
-# image contains no compiler and no build-only OS packages.
+# The runtime image is Alpine on purpose. The Debian-based variants (bookworm and
+# trixie) both fail the container image scan because glibc, acl, attr and gcc-14
+# carry high/critical advisories with no fixed version published, so no apt
+# upgrade can clear them. Alpine mirrors those packages with musl libc and a much
+# smaller package set, so the compiler and the vulnerable OS packages are simply
+# not present in the shipped layer.
+#
+# better-sqlite3 is a native module: Alpine ships no prebuilt binaries for musl,
+# so the build stage keeps python3/make/g++ to compile it from source. Only the
+# compiled artefacts reach the runtime stage.
 
 # ---------- build stage ----------
-FROM node:22-trixie-slim AS build
+FROM node:22-alpine AS build
 WORKDIR /app
 
-# better-sqlite3 ships prebuilt binaries, but keep a toolchain available so a
-# source build still succeeds on unusual platforms.
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends python3 make g++ \
-    && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache python3 make g++
 
 COPY package.json package-lock.json ./
 
@@ -31,14 +33,10 @@ COPY server ./server
 RUN npm run build && npm prune --omit=dev
 
 # ---------- runtime stage ----------
-FROM node:22-trixie-slim AS runtime
+# No compiler, no Python, no Debian packages: just Node, the musl runtime and the
+# application.
+FROM node:22-alpine AS runtime
 WORKDIR /app
-
-# Apply the Debian point releases that fix packages with an available patch.
-# No compiler, Python or build-only packages are installed in this stage.
-RUN apt-get update \
-    && apt-get upgrade -y \
-    && rm -rf /var/lib/apt/lists/*
 
 ENV NODE_ENV=production
 ENV PORT=3000

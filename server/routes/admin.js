@@ -18,7 +18,7 @@ import { allQuotes } from '../market.js';
 const router = express.Router();
 const clean = (value, max = 240) => String(value ?? '').trim().slice(0, max);
 const ip = (req) => String(req.ip || '').slice(0, 80);
-const DEMO_STARTING_BALANCE = 100_000_00;
+
 
 const adminCount = () => db.prepare("SELECT COUNT(*) AS count FROM users WHERE role = 'admin'").get().count;
 
@@ -368,31 +368,7 @@ router.patch('/customers/:id/status', (req, res) => {
       destroyUserSessions(row.id);
     }
 
-    if (action === 'activate') {
-      const account = accountFor(row.id);
-      const hasFunding = db
-        .prepare("SELECT COUNT(*) AS count FROM transactions WHERE user_id = ? AND kind = 'bonus'")
-        .get(row.id).count;
-      if (account.balance_cents === 0 && hasFunding === 0) {
-        db.prepare("UPDATE accounts SET balance_cents = ?, updated_at = datetime('now') WHERE user_id = ?").run(
-          DEMO_STARTING_BALANCE,
-          row.id
-        );
-        db.prepare(
-          `INSERT INTO transactions (id, user_id, kind, status, amount_cents, currency, method, reference, note,
-                                     balance_after_cents, is_demo, reviewed_at, reviewed_by)
-           VALUES (?, ?, 'bonus', 'completed', ?, 'USD', 'internal', ?, ?, ?, 1, datetime('now'), ?)`
-        ).run(
-          newId('txn'),
-          row.id,
-          DEMO_STARTING_BALANCE,
-          `NTX-DEMO-WELCOME-${row.id.slice(-4).toUpperCase()}`,
-          'Simulated demo starting balance — not real money',
-          DEMO_STARTING_BALANCE,
-          req.user.id
-        );
-      }
-    }
+  
 
     audit({
       actorId: req.user.id,

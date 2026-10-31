@@ -200,11 +200,9 @@ async function main() {
     const adminPage = await adminContext.newPage();
     adminPage.on('pageerror', (error) => pageErrors.push(error.message));
 
-    await adminPage.goto(`${BASE}/admin/login`, { waitUntil: 'networkidle' });
-    await signIn(adminPage, ADMIN);
-    const adminDashboard = await waitForText(adminPage, 'Operations dashboard');
-    if (!adminDashboard) {
-      check('seeded administrator reaches the console', false, `${adminPage.url()} — alert: ${await alertText(adminPage)}`);
+    const adminLogin = await signInAndWait(adminPage, `${BASE}/admin/login`, ADMIN, 'Operations dashboard');
+    if (!adminLogin.ok) {
+      check('seeded administrator reaches the console', false, `${adminPage.url()} — alert: ${adminLogin.alert}`);
       check('admin dashboard renders', false, 'dashboard heading never appeared');
     } else {
       check('seeded administrator reaches the console', adminPage.url().endsWith('/admin'), adminPage.url());

@@ -30,9 +30,9 @@ export function AuthAside({ role = 'customer' }) {
       </Link>
 
       <div>
-      <h2>{role === 'admin' ? 'Operations access for platform staff.' : 'A complete brokerage workspace.'}</h2>
+      <h2>{role === 'admin' ? 'Operations access for platform staff.' : 'A clearer view of the financial markets.'}</h2>
         <p className="small">
-          Deep-navy console, institutional layout and a ledger that reconciles from an append-only journal.
+          Access your portfolio, review account activity and manage account requests in one secure workspace.
         </p>
       </div>
 

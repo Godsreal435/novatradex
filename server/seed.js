@@ -110,6 +110,7 @@ export async function seedDemoData() {
   if (existing.count > 0) return { seeded: false, reason: 'already-populated' };
 
   const demoHash = await hashPassword(DEMO_PASSWORD);
+  const adminHash = await hashPassword(DEMO_ADMIN.password);
   const sampleHash = await hashPassword('SamplePass!2024');
 
   const seed = db.transaction(() => {

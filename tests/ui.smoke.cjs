@@ -97,27 +97,31 @@ async function waitForHealth(deadlineMs = 30000) {
 }
 
 async function main() {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'novatradex-ui-'));
-  if (!fs.existsSync(path.join(ROOT, 'dist/client/index.html'))) {
+  const dir = EXTERNAL_BASE ? '' : fs.mkdtempSync(path.join(os.tmpdir(), 'novatradex-ui-'));
+  if (!EXTERNAL_BASE && !fs.existsSync(path.join(ROOT, 'dist/client/index.html'))) {
     throw new Error('dist/client/index.html is missing — run `npm run build` first');
   }
 
-  const server = spawn(process.execPath, ['server/index.js'], {
-    cwd: ROOT,
-    env: {
-      ...process.env,
-      NODE_ENV: 'production',
-      PORT: String(PORT),
-      HOST: '0.0.0.0',
-      DATABASE_PATH: path.join(dir, 'ui.db'),
-    },
-    stdio: ['ignore', 'pipe', 'pipe'],
-  });
+  let server = null;
+  let serverLog = EXTERNAL_BASE ? `[targeting external instance ${BASE}]` : '';
 
-  let serverLog = '';
-  server.stdout.on('data', (chunk) => { serverLog += chunk.toString(); });
-  server.stderr.on('data', (chunk) => { serverLog += chunk.toString(); });
-  server.on('exit', (code) => { serverLog += `\n[server exited with code ${code}]`; });
+  if (!EXTERNAL_BASE) {
+    server = spawn(process.execPath, ['server/index.js'], {
+      cwd: ROOT,
+      env: {
+        ...process.env,
+        NODE_ENV: 'production',
+        PORT: String(PORT),
+        HOST: '0.0.0.0',
+        DATABASE_PATH: path.join(dir, 'ui.db'),
+      },
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+
+    server.stdout.on('data', (chunk) => { serverLog += chunk.toString(); });
+    server.stderr.on('data', (chunk) => { serverLog += chunk.toString(); });
+    server.on('exit', (code) => { serverLog += `\n[server exited with code ${code}]`; });
+  }
 
   const browser = await chromium.launch({
     executablePath: CHROME,

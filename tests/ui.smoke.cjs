@@ -36,6 +36,28 @@ function check(name, condition, detail) {
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+/** Wait for a text fragment, returning false instead of throwing. */
+async function waitForText(page, text, timeout = 20000) {
+  try {
+    await page.getByText(text, { exact: false }).first().waitFor({ state: 'visible', timeout });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Read any visible validation/error banner so a failed sign-in reports *why*. */
+async function alertText(page) {
+  const alerts = await page.locator('.alert').allInnerTexts().catch(() => []);
+  return alerts.join(' / ').replace(/\s+/g, ' ').trim();
+}
+
+async function signIn(page, { email, password }) {
+  await page.locator('input[type="email"]').fill(email);
+  await page.locator('input[type="password"]').fill(password);
+  await page.locator('button[type="submit"]').click();
+}
+
 async function waitForHealth(deadlineMs = 30000) {
   const started = Date.now();
   while (Date.now() - started < deadlineMs) {

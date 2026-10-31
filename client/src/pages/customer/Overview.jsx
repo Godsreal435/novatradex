@@ -52,25 +52,32 @@ export default function Overview() {
         </div>
       </div>
 
-      <section className="stat-grid">
-        <Stat
-          label="Total equity (simulated)"
-          value={money(equity)}
-          foot={`Cash ${money(cash)} + positions ${money(portfolio.investedCents)}`}
-        />
-        <Stat label="Cash demo balance" value={money(cash)} foot={`Available ${money(account.availableCents)}`} />
-        <Stat
-          label="Position P&L (simulated)"
-          value={money(pnl)}
-          tone={pnl > 0 ? 'pos' : pnl < 0 ? 'neg' : undefined}
-          foot={`${percent(portfolio.pnlPct)} on cost basis`}
-        />
-        <Stat
-          label="Pending requests"
-          value={money(account.pendingDepositCents + account.pendingWithdrawalCents)}
-          foot={`Deposits ${money(account.pendingDepositCents)} · Withdrawals ${money(account.pendingWithdrawalCents)}`}
-        />
-      </section>
+  <section className="stat-grid balance-stat-grid">
+  <Stat
+    label="Total equity (simulated)"
+    value={money(equity)}
+    foot={`Cash ${money(cash)} + positions ${money(portfolio.investedCents)}`}
+  />
+  <Stat
+    label="Cash demo balance"
+    value={money(cash)}
+    foot={`Available ${money(account.availableCents)}`}
+  />
+</section>
+
+<section className="stat-grid">
+  <Stat
+    label="Position P&L (simulated)"
+    value={money(pnl)}
+    tone={pnl > 0 ? 'pos' : pnl < 0 ? 'neg' : undefined}
+    foot={`${percent(portfolio.pnlPct)} on cost basis`}
+  />
+  <Stat
+    label="Pending requests"
+    value={money(account.pendingDepositCents + account.pendingWithdrawalCents)}
+    foot={`Deposits ${money(account.pendingDepositCents)} · Withdrawals ${money(account.pendingWithdrawalCents)}`}
+  />
+</section>
 
       <div className="grid-2">
         <section className="card">

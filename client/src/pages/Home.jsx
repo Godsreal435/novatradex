@@ -53,7 +53,7 @@ function MarketConsole({ instruments }) {
           <span className="console-title">Market Watch</span>
           <p className="small muted">Explore available markets</p>
         </div>
-        <DemoBadge />
+        
       </div>
 
       <div className="console-body">
@@ -141,10 +141,8 @@ export default function Home() {
                 </Link>
               </div>
 
-              <p className="hero-note">
-                <DemoBadge>Demo platform</DemoBadge>{' '}
-                Explore the platform using simulated funds and prices.
-              </p>
+            
+          
             </div>
 
             <MarketConsole instruments={instruments} />

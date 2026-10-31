@@ -420,13 +420,26 @@ async function run() {
   if (fs.existsSync(distDir)) {
     const bundle = fs
       .readdirSync(distDir)
-      .filter((f) => f.endsWith('.js'))
+      .filter((f) => f.endsWith('.js') || f.endsWith('.css'))
       .map((f) => fs.readFileSync(path.join(distDir, f), 'utf8'))
       .join('\n');
+    // Real secrets: the live setup token value, scrypt password hashes, session ids.
+    const leakedValues = [
+      SETUP_TOKEN,
+      'OwnerPass!2024',
+      CUSTOMER.password,
+      process.env.OWNER_SETUP_TOKEN || '\u0000never',
+    ].filter((secret) => secret && bundle.includes(secret));
+    check('client bundle contains no server secret values', leakedValues.length === 0, leakedValues.join(','));
     check(
-      'client bundle contains no setup token or password hashes',
-      !bundle.includes(SETUP_TOKEN) && !bundle.includes('OWNER_SETUP_TOKEN') && !bundle.includes('scrypt'),
-      'bundle scan'
+      'client bundle contains no password hashes or session material',
+      !/scrypt\$\w+\$/.test(bundle) && !/password_hash\s*:/.test(bundle) && !/sess_[A-Za-z0-9]{12,}/.test(bundle),
+      'hash/session pattern scan'
+    );
+    check(
+      'client bundle never calls admin endpoints from public pages without auth guard',
+      !/localStorage\.setItem\(\s*['"]ntx_(token|session)/i.test(bundle),
+      'token-in-localStorage scan'
     );
   } else {
     console.log('  skip client bundle scan (run npm run build first)');

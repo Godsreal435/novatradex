@@ -185,12 +185,15 @@ async function main() {
     adminPage.on('pageerror', (error) => pageErrors.push(error.message));
 
     await adminPage.goto(`${BASE}/admin/login`, { waitUntil: 'networkidle' });
-    await adminPage.locator('input[type="email"]').fill(ADMIN.email);
-    await adminPage.locator('input[type="password"]').fill(ADMIN.password);
-    await adminPage.locator('button[type="submit"]').click();
-    await adminPage.waitForURL((url) => url.pathname === '/admin', { timeout: 15000 }).catch(() => {});
-    check('seeded administrator reaches the console', adminPage.url().endsWith('/admin'), adminPage.url());
-    check('admin dashboard renders', await adminPage.getByText('Operations dashboard', { exact: false }).first().isVisible().catch(() => false));
+    await signIn(adminPage, ADMIN);
+    const adminDashboard = await waitForText(adminPage, 'Operations dashboard');
+    if (!adminDashboard) {
+      check('seeded administrator reaches the console', false, `${adminPage.url()} — alert: ${await alertText(adminPage)}`);
+      check('admin dashboard renders', false, 'dashboard heading never appeared');
+    } else {
+      check('seeded administrator reaches the console', adminPage.url().endsWith('/admin'), adminPage.url());
+      check('admin dashboard renders', true);
+    }
 
     for (const [route, needle] of [
       ['/admin/customers', 'Customer'],
@@ -199,7 +202,9 @@ async function main() {
       ['/admin/support', ''],
     ]) {
       await adminPage.goto(`${BASE}${route}`, { waitUntil: 'networkidle' });
+      const onLoginScreen = await adminPage.locator('input[type="email"]').isVisible().catch(() => false);
       const body = (await adminPage.content()).toLowerCase();
+      check(`admin route ${route} stays authenticated`, !onLoginScreen, adminPage.url());
       check(`admin route ${route} renders without an error screen`, !body.includes('something went wrong'), route);
       if (needle) check(`admin route ${route} lists customers`, body.includes(needle.toLowerCase()));
       check(`admin route ${route} carries a demo label`, body.includes('demo') || body.includes('simulat'));

@@ -15,7 +15,10 @@ const { chromium } = require('/opt/appjet/browser/node_modules/playwright');
 
 const ROOT = path.resolve(__dirname, '..');
 const PORT = 4399;
-const BASE = `http://127.0.0.1:${PORT}`;
+/* Set NOVATRADEX_BASE_URL to drive an already-running instance (e.g. the deployed
+ * app) instead of spawning a local production server against a throwaway database. */
+const EXTERNAL_BASE = process.env.NOVATRADEX_BASE_URL || '';
+const BASE = EXTERNAL_BASE || `http://127.0.0.1:${PORT}`;
 const CHROME = '/opt/appjet/browser-binaries/chromium-1234/chrome-linux64/chrome';
 
 const CUSTOMER = { email: 'demo@novatradex.com', password: 'DemoTrader!2024' };

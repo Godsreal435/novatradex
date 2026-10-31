@@ -1,4 +1,4 @@
-import { db, newId, audit } from './db.js';
+import { db, newId, audit, getMeta, setMeta } from './db.js';
 import { hashPassword } from './auth.js';
 import { quote } from './market.js';
 
@@ -103,6 +103,31 @@ const daysAgo = (days, hour = 10) => {
 };
 
 export async function seedDemoData() {
+  const resetKey = 'customer_balances_zeroed_v1';
+
+  if (!getMeta(resetKey)) {
+    db.transaction(() => {
+      db.prepare(`
+        UPDATE accounts
+        SET balance_cents = 0, updated_at = datetime('now')
+        WHERE user_id IN (
+          SELECT id FROM users WHERE role = 'customer'
+        )
+      `).run();
+
+      setMeta(resetKey, new Date().toISOString());
+
+      audit({
+        actorEmail: 'system',
+        actorRole: 'system',
+        action: 'customer_balances_reset_to_zero',
+        targetType: 'system',
+        targetId: resetKey,
+        detail: 'All existing customer cash balances reset to zero.',
+      });
+    })();
+  }
+ 
   if (process.env.DEMO_SEED === 'false') return { seeded: false, reason: 'disabled' };
 
   const existing = db.prepare('SELECT COUNT(*) AS count FROM users').get();
